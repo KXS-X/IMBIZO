@@ -1,0 +1,227 @@
+// Prisma Schema for DevOps Tracker
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------
+
+enum GlobalRole {
+  ADMIN
+  USER
+}
+
+enum ProjectRole {
+  CHEF_DE_PROJET
+  DESIGNER
+  DEVELOPPEUR
+  MEMBRE
+}
+
+enum TaskStatus {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}
+
+enum TaskPriority {
+  BASSE
+  MOYENNE
+  HAUTE
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  NO_TASK_SIGNAL
+  GITHUB_PUSH
+  PROJECT_INVITE
+  GENERAL
+}
+
+enum ActivityType {
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_STATUS_CHANGED
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  TASK_DELETED
+}
+
+// ------------------------------------------------------
+// MODELS
+// ------------------------------------------------------
+
+model User {
+  id            String          @id @default(uuid())
+  name          String
+  email         String          @unique
+  password      String
+  role          GlobalRole      @default(USER)
+  avatar        String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relations
+  createdProjects Project[]     @relation("ProjectCreator")
+  projectMembers  ProjectMember[]
+  assignedTasks   Task[]        @relation("AssignedTasks")
+  createdTasks    Task[]        @relation("CreatedTasks")
+  messages        Message[]
+  messageReactions MessageReaction[]
+  notifications   Notification[]
+  activities      Activity[]
+
+  @@map("users")
+}
+
+model Project {
+  id            String          @id @default(uuid())
+  name          String
+  description   String?
+  githubRepo    String?         // Format: "owner/repo" ou URL
+  webhookSecret String?
+  createdById   String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relations
+  createdBy     User            @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  members       ProjectMember[]
+  tasks         Task[]
+  messages      Message[]
+  notifications Notification[]
+  activities    Activity[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(MEMBRE)
+  joinedAt  DateTime    @default(now())
+
+  // Relations
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  status       TaskStatus   @default(A_FAIRE)
+  priority     TaskPriority @default(MOYENNE)
+  projectId    String
+  assignedToId String?
+  createdById  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo   User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy    User         @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Cascade)
+  activities   Activity[]
+
+  @@map("tasks")
+}
+
+model Activity {
+  id        String       @id @default(uuid())
+  projectId String
+  taskId    String?
+  userId    String
+  type      ActivityType
+  message   String
+  data      String?
+  createdAt DateTime     @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([taskId, createdAt])
+  @@map("activities")
+}
+
+model Message {
+  id        String              @id @default(uuid())
+  content   String
+  projectId String
+  userId    String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @default(now()) @updatedAt
+  isPinned  Boolean             @default(false)
+  isDeleted Boolean             @default(false)
+
+  // Relations
+  project   Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments MessageAttachment[]
+  reactions MessageReaction[]
+
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id           String   @id @default(uuid())
+  messageId    String
+  originalName String
+  storedName   String   @unique
+  mimeType     String
+  size         Int
+  url          String
+  createdAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_attachments")
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@map("message_reactions")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  projectId String?
+  type      NotificationType @default(GENERAL)
+  title     String
+  message   String
+  data      String?          // Données JSON stringifiées pour métadonnées complémentaires
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project?         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
