@@ -63,6 +63,8 @@ export function AuthProvider({ children }) {
   };
 
   const isAdmin = user?.role === 'ADMIN';
+  const isChefDeProjet = user?.role === 'CHEF_DE_PROJET';
+  const canCreateProject = isAdmin || isChefDeProjet;
 
   return (
     <AuthContext.Provider
@@ -72,6 +74,8 @@ export function AuthProvider({ children }) {
         loading,
         isAuthenticated: !!user,
         isAdmin,
+        isChefDeProjet,
+        canCreateProject,
         login,
         register,
         logout,

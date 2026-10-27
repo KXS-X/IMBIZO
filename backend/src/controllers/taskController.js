@@ -52,6 +52,17 @@ async function createTask(req, res) {
         },
         project: {
           select: { id: true, name: true }
+        },
+        comments: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true, role: true }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        },
+        _count: {
+          select: { comments: true }
         }
       }
     });
@@ -121,6 +132,17 @@ async function getProjectTasks(req, res) {
         },
         createdBy: {
           select: { id: true, name: true }
+        },
+        comments: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true, role: true }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        },
+        _count: {
+          select: { comments: true }
         }
       },
       orderBy: [
@@ -161,6 +183,17 @@ async function getMyTasks(req, res) {
         },
         createdBy: {
           select: { id: true, name: true }
+        },
+        comments: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true, role: true }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        },
+        _count: {
+          select: { comments: true }
         }
       },
       orderBy: { updatedAt: 'desc' }
@@ -230,6 +263,17 @@ async function updateTask(req, res) {
         },
         project: {
           select: { id: true, name: true }
+        },
+        comments: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true, role: true }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        },
+        _count: {
+          select: { comments: true }
         }
       }
     });
@@ -490,6 +534,249 @@ async function signalNoTask(req, res) {
   }
 }
 
+/**
+ * Récupère tous les commentaires d'une tâche
+ */
+async function getTaskComments(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const isAdmin = req.user.role === 'ADMIN';
+
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        project: {
+          include: {
+            members: true
+          }
+        }
+      }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tâche introuvable.'
+      });
+    }
+
+    const isMember = task.project.members.some(m => m.userId === userId);
+    if (!isMember && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Vous n\'avez pas accès à ce projet.'
+      });
+    }
+
+    const comments = await prisma.taskComment.findMany({
+      where: { taskId: id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+            role: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: { comments }
+    });
+  } catch (error) {
+    console.error('Erreur getTaskComments:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des commentaires.'
+    });
+  }
+}
+
+/**
+ * Ajoute un commentaire sur une tâche
+ * Règle : Un utilisateur doit pouvoir laisser un commentaire sur la tâche qui lui est attribuée.
+ * Également permis au Super Admin, au Chef de Projet et au créateur de la tâche.
+ */
+async function createTaskComment(req, res) {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const userId = req.user.id;
+    const isAdmin = req.user.role === 'ADMIN';
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le contenu du commentaire ne peut pas être vide.'
+      });
+    }
+
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        project: {
+          include: {
+            members: true
+          }
+        }
+      }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tâche introuvable.'
+      });
+    }
+
+    const isAssignee = task.assignedToId === userId;
+    const isChef = task.project.members.some(m => m.userId === userId && m.role === 'CHEF_DE_PROJET') || req.user.role === 'CHEF_DE_PROJET';
+    const isCreator = task.createdById === userId;
+
+    if (!isAssignee && !isAdmin && !isChef && !isCreator) {
+      return res.status(403).json({
+        success: false,
+        message: 'Action non autorisée. Vous ne pouvez laisser un commentaire que sur les tâches qui vous sont attribuées.'
+      });
+    }
+
+    const comment = await prisma.taskComment.create({
+      data: {
+        content: content.trim(),
+        taskId: id,
+        userId: userId
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+            role: true
+          }
+        }
+      }
+    });
+
+    // Journal d'activité
+    await logActivity({
+      projectId: task.projectId,
+      taskId: task.id,
+      userId,
+      type: 'TASK_UPDATED',
+      message: `${req.user.name} a commenté la tâche « ${task.title} ».`
+    });
+
+    // Notification à la personne assignée si elle n'est pas l'auteur du commentaire
+    if (task.assignedToId && task.assignedToId !== userId) {
+      const notif = await prisma.notification.create({
+        data: {
+          userId: task.assignedToId,
+          projectId: task.projectId,
+          type: 'GENERAL',
+          title: 'Nouveau commentaire',
+          message: `${req.user.name} a commenté la tâche "${task.title}".`
+        }
+      });
+      emitNotificationToUser(task.assignedToId, notif);
+    }
+
+    // Si l'auteur est la personne assignée, notifier le chef de projet ou le créateur de la tâche
+    if (isAssignee && task.createdById !== userId) {
+      const notifCreator = await prisma.notification.create({
+        data: {
+          userId: task.createdById,
+          projectId: task.projectId,
+          type: 'GENERAL',
+          title: 'Nouveau commentaire de l\'assigné',
+          message: `${req.user.name} a commenté la tâche "${task.title}".`
+        }
+      });
+      emitNotificationToUser(task.createdById, notifCreator);
+    }
+
+    // Émettre la mise à jour en temps réel
+    emitTaskUpdated(task.projectId, { ...task, newComment: comment }, 'UPDATE');
+
+    return res.status(201).json({
+      success: true,
+      message: 'Commentaire ajouté avec succès.',
+      data: { comment }
+    });
+  } catch (error) {
+    console.error('Erreur createTaskComment:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur lors de l\'ajout du commentaire.'
+    });
+  }
+}
+
+/**
+ * Supprime un commentaire
+ */
+async function deleteTaskComment(req, res) {
+  try {
+    const { id, commentId } = req.params;
+    const userId = req.user.id;
+    const isAdmin = req.user.role === 'ADMIN';
+
+    const comment = await prisma.taskComment.findUnique({
+      where: { id: commentId },
+      include: {
+        task: {
+          include: {
+            project: {
+              include: {
+                members: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commentaire introuvable.'
+      });
+    }
+
+    const isAuthor = comment.userId === userId;
+    const isChef = comment.task.project.members.some(m => m.userId === userId && m.role === 'CHEF_DE_PROJET');
+
+    if (!isAuthor && !isAdmin && !isChef) {
+      return res.status(403).json({
+        success: false,
+        message: 'Vous n\'êtes pas autorisé à supprimer ce commentaire.'
+      });
+    }
+
+    await prisma.taskComment.delete({
+      where: { id: commentId }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Commentaire supprimé avec succès.'
+    });
+  } catch (error) {
+    console.error('Erreur deleteTaskComment:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la suppression du commentaire.'
+    });
+  }
+}
+
 module.exports = {
   createTask,
   getProjectTasks,
@@ -497,5 +784,8 @@ module.exports = {
   updateTask,
   toggleTaskStatus,
   deleteTask,
-  signalNoTask
+  signalNoTask,
+  getTaskComments,
+  createTaskComment,
+  deleteTaskComment
 };

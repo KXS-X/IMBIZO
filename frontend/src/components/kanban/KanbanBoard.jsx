@@ -12,7 +12,7 @@ import { TaskModal } from './TaskModal';
 
 const columns = [
   { id: 'A_FAIRE', title: 'À faire', icon: ListTodo, iconClass: 'text-muted-foreground', iconBackground: 'bg-muted' },
-  { id: 'EN_COURS', title: 'En cours', icon: Clock3, iconClass: 'text-blue-500', iconBackground: 'bg-blue-500/10' },
+  { id: 'EN_COURS', title: 'En cours', icon: Clock3, iconClass: 'text-orange-500', iconBackground: 'bg-orange-500/10' },
   { id: 'TERMINE', title: 'Terminé', icon: CheckCircle2, iconClass: 'text-emerald-500', iconBackground: 'bg-emerald-500/10' },
 ];
 

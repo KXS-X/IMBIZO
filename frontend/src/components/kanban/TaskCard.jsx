@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CheckSquare, Clock, Edit2, Square, Trash2 } from 'lucide-react';
+import { CheckSquare, Clock, Edit2, MessageSquare, Square, Trash2 } from 'lucide-react';
 
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -146,12 +146,25 @@ export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChang
             )}
           </div>
 
-          {timeAgo && (
-            <div className="flex shrink-0 items-center gap-1">
-              <Clock className="size-3" />
-              <span>{timeAgo}</span>
-            </div>
-          )}
+          <div className="flex shrink-0 items-center gap-3">
+            {Boolean(task._count?.comments || task.comments?.length) && (
+              <button
+                type="button"
+                onClick={() => onEdit?.(task)}
+                className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                title={`${task._count?.comments || task.comments?.length} commentaire(s)`}
+              >
+                <MessageSquare className="size-3.5" />
+                <span className="text-[11px] font-medium">{task._count?.comments || task.comments?.length}</span>
+              </button>
+            )}
+            {timeAgo && (
+              <div className="flex shrink-0 items-center gap-1">
+                <Clock className="size-3" />
+                <span>{timeAgo}</span>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

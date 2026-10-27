@@ -25,20 +25,29 @@ async function createProject(req, res) {
       });
     }
 
-    const project = await prisma.project.create({
-      data: {
-        name: name.trim(),
-        description: description ? description.trim() : null,
-        githubRepo: githubRepo ? githubRepo.trim() : null,
-        webhookSecret: webhookSecret ? webhookSecret.trim() : null,
-        createdById: userId,
-        members: {
-          create: {
-            userId: userId,
-            role: 'CHEF_DE_PROJET'
-          }
+    const isSuperAdmin = req.user.role === 'ADMIN';
+
+    const projectData = {
+      name: name.trim(),
+      description: description ? description.trim() : null,
+      githubRepo: githubRepo ? githubRepo.trim() : null,
+      webhookSecret: webhookSecret ? webhookSecret.trim() : null,
+      createdById: userId,
+    };
+
+    // Si le créateur n'est pas un Super Admin, il devient automatiquement CHEF_DE_PROJET.
+    // Lorsque le super admin crée un projet, il ne doit pas être automatiquement ajouté dans le projet.
+    if (!isSuperAdmin) {
+      projectData.members = {
+        create: {
+          userId: userId,
+          role: 'CHEF_DE_PROJET'
         }
-      },
+      };
+    }
+
+    const project = await prisma.project.create({
+      data: projectData,
       include: {
         members: {
           include: {
@@ -87,8 +96,8 @@ async function getUserProjects(req, res) {
 
     let projects;
 
-    if (isAdmin && req.query.all === 'true') {
-      // Pour l'administrateur voulant voir l'ensemble des projets
+    if (isAdmin) {
+      // Pour l'administrateur : accès à l'ensemble des projets (même s'il n'est pas membre)
       projects = await prisma.project.findMany({
         include: {
           createdBy: {
@@ -219,6 +228,17 @@ async function getProjectById(req, res) {
             },
             createdBy: {
               select: { id: true, name: true }
+            },
+            comments: {
+              include: {
+                user: {
+                  select: { id: true, name: true, email: true, avatar: true, role: true }
+                }
+              },
+              orderBy: { createdAt: 'asc' }
+            },
+            _count: {
+              select: { comments: true }
             }
           },
           orderBy: { createdAt: 'desc' }

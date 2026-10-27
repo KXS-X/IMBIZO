@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Clock3, ListTodo, Search } from 'lucide-react';
 
 import { TaskCard } from '../components/kanban/TaskCard';
+import { TaskModal } from '../components/kanban/TaskModal';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -37,6 +38,7 @@ export function MyTasksPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const loadTasks = async () => {
     try {
@@ -147,12 +149,31 @@ export function MyTasksPage() {
           ) : (
             <div className="grid gap-4 xl:grid-cols-3">
               {filteredTasks.map((task) => (
-                <TaskCard key={task.id} task={task} onToggleStatus={handleToggleTask} onStatusChange={handleStatusChange} currentUserId={user?.id} isChefOrAdmin={false} />
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onToggleStatus={handleToggleTask}
+                  onStatusChange={handleStatusChange}
+                  onEdit={(t) => setSelectedTask(t)}
+                  currentUserId={user?.id}
+                  isChefOrAdmin={false}
+                />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {selectedTask && (
+        <TaskModal
+          isOpen={Boolean(selectedTask)}
+          onClose={() => setSelectedTask(null)}
+          projectId={selectedTask.projectId}
+          task={selectedTask}
+          members={[]}
+          onTaskSaved={loadTasks}
+        />
+      )}
     </div>
   );
 }

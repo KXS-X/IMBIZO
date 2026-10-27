@@ -108,15 +108,15 @@ async function updateUserRole(req, res) {
     const { id } = req.params;
     const { role } = req.body;
 
-    if (!role || !['ADMIN', 'USER'].includes(role)) {
+    if (!role || !['ADMIN', 'CHEF_DE_PROJET', 'USER'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Rôle invalide. Les rôles autorisés sont ADMIN ou USER.'
+        message: 'Rôle invalide. Les rôles autorisés sont ADMIN, CHEF_DE_PROJET ou USER.'
       });
     }
 
     // Empêcher l'administrateur de révoquer son propre statut admin s'il est le seul
-    if (id === req.user.id && role === 'USER') {
+    if (id === req.user.id && role !== 'ADMIN') {
       const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
       if (adminCount <= 1) {
         return res.status(400).json({
@@ -185,7 +185,7 @@ async function createUser(req, res) {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        role: role === 'ADMIN' ? 'ADMIN' : 'USER',
+        role: ['ADMIN', 'CHEF_DE_PROJET'].includes(role) ? role : 'USER',
         avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(email)}`
       },
       select: {

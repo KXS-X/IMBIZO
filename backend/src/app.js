@@ -57,7 +57,7 @@ app.use('/uploads', express.static(uploadDirectory));
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    service: 'DevOps Tracker API',
+    service: 'Imbizo API',
     version: '1.0.0',
     timestamp: new Date().toISOString()
   });

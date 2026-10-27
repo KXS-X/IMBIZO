@@ -3,6 +3,7 @@ import { ArrowRight, CheckSquare, FolderKanban, GitBranch, Plus, Search, Users }
 import { Link, useNavigate } from 'react-router-dom';
 
 import { projectService } from '../services/projectService';
+import { useAuth } from '../context/AuthContext';
 import { UserAvatar } from '../components/common/UserAvatar';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -38,7 +39,7 @@ const roleLabels = {
 const roleStyles = {
   ADMIN: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
   CHEF_DE_PROJET: 'border-primary/30 bg-primary/10 text-primary',
-  DEVELOPPEUR: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300',
+  DEVELOPPEUR: 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300',
   DESIGNER: 'border-pink-500/30 bg-pink-500/10 text-pink-700 dark:text-pink-300',
   MEMBRE: 'border-muted-foreground/20 bg-muted text-muted-foreground',
 };
@@ -171,6 +172,7 @@ function ProjectSkeleton() {
 
 export function ProjectsPage() {
   const navigate = useNavigate();
+  const { canCreateProject } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -251,10 +253,12 @@ export function ProjectsPage() {
             Retrouvez vos espaces de travail, suivez leur activité et collaborez avec votre équipe.
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus />
-          Nouveau projet
-        </Button>
+        {canCreateProject && (
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus />
+            Nouveau projet
+          </Button>
+        )}
       </section>
 
       <section className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -289,9 +293,11 @@ export function ProjectsPage() {
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
               {searchQuery
                 ? 'Aucun projet ne correspond à votre recherche.'
-                : 'Créez votre premier espace de travail collaboratif.'}
+                : canCreateProject
+                  ? 'Créez votre premier espace de travail collaboratif.'
+                  : 'Vous n’êtes membre d’aucun projet pour le moment.'}
             </p>
-            {!searchQuery && (
+            {!searchQuery && canCreateProject && (
               <Button className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
                 <Plus />
                 Créer un projet
@@ -331,7 +337,7 @@ export function ProjectsPage() {
               <Label htmlFor="project-name">Nom du projet</Label>
               <Input
                 id="project-name"
-                placeholder="Ex. Refonte DevOps Tracker"
+                placeholder="Ex. Refonte plateforme Imbizo"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required

@@ -3,7 +3,7 @@ const router = express.Router();
 const projectController = require('../controllers/projectController');
 const activityController = require('../controllers/activityController');
 const { authenticateToken } = require('../middlewares/auth');
-const { requireProjectRole, requireAdmin } = require('../middlewares/role');
+const { requireProjectRole, requireAdmin, requireCanCreateProject } = require('../middlewares/role');
 const { validateBody } = require('../middlewares/validate');
 
 // Authentification requise pour toutes les routes projets
@@ -12,8 +12,8 @@ router.use(authenticateToken);
 // Récupérer la liste des projets de l'utilisateur
 router.get('/', projectController.getUserProjects);
 
-// Créer un nouveau projet (tous les utilisateurs enregistrés peuvent créer un projet)
-router.post('/', validateBody(['name']), projectController.createProject);
+// Créer un nouveau projet (uniquement Super Admin ou Chef de Projet)
+router.post('/', requireCanCreateProject, validateBody(['name']), projectController.createProject);
 
 // Obtenir les détails d'un projet par son ID
 router.get('/:id', projectController.getProjectById);

@@ -91,7 +91,7 @@ async function handleGitHubWebhook(req, res) {
     }
 
     if (!project) {
-      console.warn(`[Webhook GitHub] Aucun projet DevOps Tracker associé au dépôt : ${repoFullName}`);
+      console.warn(`[Webhook GitHub] Aucun projet Imbizo associé au dépôt : ${repoFullName}`);
       return res.status(200).json({
         success: true,
         message: `Webhook reçu pour ${repoFullName}, mais aucun projet correspondant n'a été trouvé.`

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, CheckSquare, FolderKanban, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
+import { Bell, CheckSquare, FolderKanban, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { OrangeLogo } from './common/OrangeLogo';
 
 import { NavMain } from '@/components/nav-main';
 import { NavProjects } from '@/components/nav-projects';
@@ -58,13 +59,11 @@ export function AppSidebar({ ...props }) {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild tooltip="DevOpsTracker">
+              <SidebarMenuButton size="lg" asChild tooltip="Imbizo">
                 <Link to="/">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <Zap className="size-4" />
-                  </div>
+                  <OrangeLogo className="size-8 rounded-lg shrink-0 shadow-sm" />
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">DevOpsTracker</span>
+                    <span className="truncate font-semibold">Imbizo</span>
                     <span className="truncate text-xs text-sidebar-foreground/60">Espace d’équipe</span>
                   </div>
                 </Link>

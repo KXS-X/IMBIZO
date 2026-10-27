@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowRight, GitBranch, ListChecks, MessageSquare, Zap } from 'lucide-react';
+import { ArrowRight, GitBranch, ListChecks, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { OrangeLogo } from '../common/OrangeLogo';
 import {
   Card,
   CardContent,
@@ -12,11 +13,9 @@ import {
 function BrandMark({ compact = false }) {
   return (
     <Link to="/login" className="group inline-flex items-center gap-3" aria-label="Retour à la connexion">
-      <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-        <Zap className="size-4" strokeWidth={2.5} />
-      </span>
+      <OrangeLogo className="size-9 rounded-lg shadow-sm transition-transform group-hover:scale-105" />
       <span className="font-heading text-base font-semibold tracking-tight text-foreground">
-        DevOps<span className="text-primary">Tracker</span>
+        Imbi<span className="text-primary">zo</span>
         {!compact && <span className="ml-2 text-[10px] font-medium text-muted-foreground">workspace</span>}
       </span>
     </Link>
@@ -58,7 +57,7 @@ export function AuthLayout({ eyebrow, title, description, children, footer }) {
   return (
     <main className="min-h-svh bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
       <div className="mx-auto grid min-h-svh w-full max-w-[1440px] grid-cols-1 gap-10 px-6 py-8 sm:px-10 lg:grid-cols-[minmax(0,1fr)_460px] lg:items-center lg:gap-24 lg:px-16 lg:py-12">
-        <section className="hidden lg:block" aria-label="Présentation de DevOpsTracker">
+        <section className="hidden lg:block" aria-label="Présentation de Imbizo">
           <BrandMark />
           <div className="mt-20 max-w-2xl">
             <p className="mb-5 text-sm font-medium text-primary">Coordination d’équipe, sans angle mort</p>
@@ -90,7 +89,7 @@ export function AuthLayout({ eyebrow, title, description, children, footer }) {
           </Card>
 
           {footer && <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">{footer}</div>}
-          <p className="mt-10 text-center text-[11px] text-slate-400 dark:text-slate-600">DevOpsTracker · espace de travail d’équipe</p>
+          <p className="mt-10 text-center text-[11px] text-slate-400 dark:text-slate-600">Imbizo · espace de travail d’équipe</p>
         </section>
       </div>
     </main>

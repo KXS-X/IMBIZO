@@ -173,8 +173,41 @@ async function canModifyTask(req, res, next) {
   }
 }
 
+/**
+ * Middleware vérifiant l'autorisation de créer un projet :
+ * Seuls le Super Administrateur ('ADMIN') et les Chefs de projet ('CHEF_DE_PROJET')
+ * peuvent créer un nouveau projet. Les utilisateurs standards ('USER') ne le peuvent pas.
+ */
+async function requireCanCreateProject(req, res, next) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentification requise.'
+      });
+    }
+
+    // Seuls le super admin et les chefs de projet peuvent créer un projet
+    if (req.user.role === 'ADMIN' || req.user.role === 'CHEF_DE_PROJET') {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: 'Action non autorisée. Seuls le super administrateur et les chefs de projet peuvent créer un projet.'
+    });
+  } catch (error) {
+    console.error('Erreur requireCanCreateProject:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la vérification des permissions de création de projet.'
+    });
+  }
+}
+
 module.exports = {
   requireAdmin,
   requireProjectRole,
-  canModifyTask
+  canModifyTask,
+  requireCanCreateProject
 };

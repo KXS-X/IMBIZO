@@ -31,7 +31,7 @@ initSocket(io);
 // Démarrage du serveur
 server.listen(PORT, () => {
   console.log('====================================================');
-  console.log(`🚀 Serveur DevOps Tracker démarré sur le port ${PORT}`);
+  console.log(`🚀 Serveur Imbizo démarré sur le port ${PORT}`);
   console.log(`📡 URL API : http://localhost:${PORT}/api`);
   console.log(`⚡ WebSocket Socket.io initialisé et prêt`);
   console.log(`🌍 Environnement : ${process.env.NODE_ENV || 'development'}`);

@@ -16,7 +16,12 @@ router.post('/signal-no-task', validateBody(['projectId']), taskController.signa
 router.post('/', requireProjectRole(), validateBody(['title']), taskController.createTask);
 router.get('/', requireProjectRole(), taskController.getProjectTasks);
 
-// 3. Modification / Suppression / Basculement de statut d'une tâche précise
+// 3. Commentaires sur une tâche
+router.get('/:id/comments', taskController.getTaskComments);
+router.post('/:id/comments', validateBody(['content']), taskController.createTaskComment);
+router.delete('/:id/comments/:commentId', taskController.deleteTaskComment);
+
+// 4. Modification / Suppression / Basculement de statut d'une tâche précise
 router.put('/:id', canModifyTask, taskController.updateTask);
 router.patch('/:id/toggle', canModifyTask, taskController.toggleTaskStatus);
 router.delete('/:id', canModifyTask, taskController.deleteTask);

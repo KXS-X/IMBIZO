@@ -23,7 +23,7 @@ const roleLabels = {
 const roleStyles = {
   ADMIN: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
   CHEF_DE_PROJET: 'border-primary/30 bg-primary/10 text-primary',
-  DEVELOPPEUR: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300',
+  DEVELOPPEUR: 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300',
   DESIGNER: 'border-pink-500/30 bg-pink-500/10 text-pink-700 dark:text-pink-300',
   MEMBRE: 'border-muted-foreground/20 bg-muted text-muted-foreground',
 };

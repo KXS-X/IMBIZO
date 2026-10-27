@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DEVOPS TRACKER - DESIGN SYSTEM & STYLES
+   IMBIZO - DESIGN SYSTEM & STYLES
    ========================================================================== */
 
 @import "tailwindcss";
@@ -20,17 +20,17 @@
 
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.18);
-  --border-glow: rgba(99, 102, 241, 0.35);
+  --border-glow: rgba(249, 115, 22, 0.35);
 
   --text-primary: #f9fafb;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
 
   /* Couleurs d'accentuation */
-  --primary: oklch(0.6231 0.1880 259.8145);
-  --primary-hover: #4f46e5;
-  --primary-light: rgba(99, 102, 241, 0.15);
-  --brand-secondary: #a855f7;
+  --primary: oklch(0.646 0.222 41.116);
+  --primary-hover: #ea580c;
+  --primary-light: rgba(249, 115, 22, 0.15);
+  --brand-secondary: #f97316;
   --cyan: #06b6d4;
   --emerald: #10b981;
   --amber: #f59e0b;
@@ -39,14 +39,14 @@
   /* Statuts Tâches */
   --status-todo: #64748b;
   --status-todo-bg: rgba(100, 116, 139, 0.15);
-  --status-progress: #3b82f6;
-  --status-progress-bg: rgba(59, 130, 246, 0.15);
+  --status-progress: #f97316;
+  --status-progress-bg: rgba(249, 115, 22, 0.15);
   --status-done: #10b981;
   --status-done-bg: rgba(16, 185, 129, 0.15);
 
   /* Rôles Projets */
   --role-chef: #a855f7;
-  --role-dev: #3b82f6;
+  --role-dev: #f97316;
   --role-designer: #ec4899;
   --role-membre: #64748b;
 
@@ -58,7 +58,7 @@
   --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
   --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
   --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.25);
+  --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.25);
 
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --font-heading: 'Geist Variable', sans-serif;
@@ -74,26 +74,26 @@
   --secondary-foreground: oklch(0.4461 0.0263 256.8018);
   --muted: oklch(0.9846 0.0017 247.8389);
   --muted-foreground: oklch(0.5510 0.0234 264.3637);
-  --accent: oklch(0.9514 0.0250 236.8242);
-  --accent-foreground: oklch(0.3791 0.1378 265.5222);
+  --accent: oklch(0.96 0.03 45);
+  --accent-foreground: oklch(0.45 0.18 41);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --border: oklch(0.9276 0.0058 264.5313);
   --input: oklch(0.9276 0.0058 264.5313);
-  --ring: oklch(0.6231 0.1880 259.8145);
-  --chart-1: oklch(0.6231 0.1880 259.8145);
-  --chart-2: oklch(0.5461 0.2152 262.8809);
-  --chart-3: oklch(0.4882 0.2172 264.3763);
-  --chart-4: oklch(0.4244 0.1809 265.6377);
-  --chart-5: oklch(0.3791 0.1378 265.5222);
+  --ring: oklch(0.646 0.222 41.116);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.705 0.213 47.604);
+  --chart-3: oklch(0.75 0.18 55);
+  --chart-4: oklch(0.80 0.15 65);
+  --chart-5: oklch(0.85 0.12 75);
   --radius: 0.8rem;
   --sidebar: oklch(0.9846 0.0017 247.8389);
   --sidebar-foreground: oklch(0.3211 0 0);
-  --sidebar-primary: oklch(0.6231 0.1880 259.8145);
+  --sidebar-primary: oklch(0.646 0.222 41.116);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9514 0.0250 236.8242);
-  --sidebar-accent-foreground: oklch(0.3791 0.1378 265.5222);
+  --sidebar-accent: oklch(0.96 0.03 45);
+  --sidebar-accent-foreground: oklch(0.45 0.18 41);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
-  --sidebar-ring: oklch(0.6231 0.1880 259.8145);
+  --sidebar-ring: oklch(0.646 0.222 41.116);
   --secondary: oklch(0.9670 0.0029 264.5419);
   --destructive-foreground: oklch(1.0000 0 0);
   --font-sans: 'Geist Variable', ui-sans-serif, sans-serif, system-ui;
@@ -125,7 +125,7 @@
 
   --border-color: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.15);
-  --border-glow: rgba(99, 102, 241, 0.25);
+  --border-glow: rgba(249, 115, 22, 0.25);
 
   --text-primary: #111827;
   --text-secondary: #4b5563;
@@ -230,7 +230,7 @@
 
 /* Gradients et Textes Brillants */
 .text-gradient {
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%);
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -254,11 +254,11 @@
 }
 
 .badge-todo { background: var(--status-todo-bg); color: var(--status-todo); border: 1px solid rgba(100, 116, 139, 0.3); }
-.badge-progress { background: var(--status-progress-bg); color: var(--status-progress); border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-progress { background: var(--status-progress-bg); color: var(--status-progress); border: 1px solid rgba(249, 115, 22, 0.3); }
 .badge-done { background: var(--status-done-bg); color: var(--status-done); border: 1px solid rgba(16, 185, 129, 0.3); }
 
 .badge-chef { background: rgba(168, 85, 247, 0.15); color: var(--role-chef); border: 1px solid rgba(168, 85, 247, 0.3); }
-.badge-dev { background: rgba(59, 130, 246, 0.15); color: var(--role-dev); border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-dev { background: rgba(249, 115, 22, 0.15); color: var(--role-dev); border: 1px solid rgba(249, 115, 22, 0.3); }
 .badge-designer { background: rgba(236, 72, 153, 0.15); color: var(--role-designer); border: 1px solid rgba(236, 72, 153, 0.3); }
 .badge-membre { background: rgba(100, 116, 139, 0.15); color: var(--role-membre); border: 1px solid rgba(100, 116, 139, 0.3); }
 .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
@@ -278,14 +278,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #ea580c 100%);
   color: white;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
   transform: translateY(-1px);
 }
 
@@ -366,7 +366,7 @@
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
 }
 
 .form-textarea {
@@ -538,31 +538,31 @@
   --card-foreground: oklch(0.9219 0 0);
   --popover: oklch(0.2686 0 0);
   --popover-foreground: oklch(0.9219 0 0);
-  --primary: oklch(0.6231 0.1880 259.8145);
+  --primary: oklch(0.646 0.222 41.116);
   --primary-foreground: oklch(1.0000 0 0);
   --secondary: oklch(0.2686 0 0);
   --secondary-foreground: oklch(0.9219 0 0);
   --muted: oklch(0.2393 0 0);
   --muted-foreground: oklch(0.7155 0 0);
-  --accent: oklch(0.3791 0.1378 265.5222);
-  --accent-foreground: oklch(0.8823 0.0571 254.1284);
+  --accent: oklch(0.28 0.06 45);
+  --accent-foreground: oklch(0.92 0.05 45);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --border: oklch(0.3715 0 0);
   --input: oklch(0.3715 0 0);
-  --ring: oklch(0.6231 0.1880 259.8145);
-  --chart-1: oklch(0.7137 0.1434 254.6240);
-  --chart-2: oklch(0.6231 0.1880 259.8145);
-  --chart-3: oklch(0.5461 0.2152 262.8809);
-  --chart-4: oklch(0.4882 0.2172 264.3763);
-  --chart-5: oklch(0.4244 0.1809 265.6377);
+  --ring: oklch(0.646 0.222 41.116);
+  --chart-1: oklch(0.705 0.213 47.604);
+  --chart-2: oklch(0.646 0.222 41.116);
+  --chart-3: oklch(0.60 0.20 35);
+  --chart-4: oklch(0.75 0.18 55);
+  --chart-5: oklch(0.80 0.15 65);
   --sidebar: oklch(0.2046 0 0);
   --sidebar-foreground: oklch(0.9219 0 0);
-  --sidebar-primary: oklch(0.6231 0.1880 259.8145);
+  --sidebar-primary: oklch(0.646 0.222 41.116);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.3791 0.1378 265.5222);
-  --sidebar-accent-foreground: oklch(0.8823 0.0571 254.1284);
+  --sidebar-accent: oklch(0.28 0.06 45);
+  --sidebar-accent-foreground: oklch(0.92 0.05 45);
   --sidebar-border: oklch(0.3715 0 0);
-  --sidebar-ring: oklch(0.6231 0.1880 259.8145);
+  --sidebar-ring: oklch(0.646 0.222 41.116);
   --destructive-foreground: oklch(1.0000 0 0);
   --radius: 0.8rem;
   --font-sans: 'Geist Variable', ui-sans-serif, sans-serif, system-ui;

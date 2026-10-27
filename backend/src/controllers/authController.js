@@ -130,13 +130,18 @@ async function login(req, res) {
       role: user.role
     });
 
+    const isChefDeProjet = user.role === 'CHEF_DE_PROJET';
+    const canCreateProject = user.role === 'ADMIN' || user.role === 'CHEF_DE_PROJET';
+
     const userPayload = {
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
       avatar: user.avatar,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      isChefDeProjet,
+      canCreateProject
     };
 
     return res.status(200).json({
@@ -172,6 +177,11 @@ async function getMe(req, res) {
         role: true,
         avatar: true,
         createdAt: true,
+        projectMembers: {
+          select: {
+            role: true
+          }
+        },
         _count: {
           select: {
             projectMembers: true,
@@ -191,6 +201,9 @@ async function getMe(req, res) {
       });
     }
 
+    const isChefDeProjet = user.role === 'CHEF_DE_PROJET';
+    const canCreateProject = user.role === 'ADMIN' || user.role === 'CHEF_DE_PROJET';
+
     return res.status(200).json({
       success: true,
       data: {
@@ -201,6 +214,8 @@ async function getMe(req, res) {
           role: user.role,
           avatar: user.avatar,
           createdAt: user.createdAt,
+          isChefDeProjet,
+          canCreateProject,
           stats: {
             projectsCount: user._count.projectMembers,
             assignedTasksCount: user._count.assignedTasks,

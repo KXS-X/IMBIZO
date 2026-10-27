@@ -59,7 +59,7 @@ function ProjectRow({ project }) {
 }
 
 export function DashboardPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, canCreateProject } = useAuth();
   const [projects, setProjects] = useState([]);
   const [myTasks, setMyTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -108,14 +108,16 @@ export function DashboardPage() {
             Voici l’état d’avancement de vos projets et tâches en cours.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <Link to="/projects">
-              <Plus />
-              Nouveau projet
-            </Link>
-          </Button>
-        </div>
+        {canCreateProject && (
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link to="/projects">
+                <Plus />
+                Nouveau projet
+              </Link>
+            </Button>
+          </div>
+        )}
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Résumé de l’activité">
