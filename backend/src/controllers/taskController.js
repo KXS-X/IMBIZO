@@ -8,7 +8,7 @@ const { logActivity } = require('../utils/activityLogger');
 async function createTask(req, res) {
   try {
     const { projectId } = req.params;
-    const { title, description, status, priority, assignedToId } = req.body;
+    const { title, description, status, priority, assignedToId, featureId } = req.body;
     const userId = req.user.id;
 
     if (!title || !title.trim()) {
@@ -31,6 +31,21 @@ async function createTask(req, res) {
           message: 'L\'utilisateur assigné n\'est pas membre de ce projet.'
         });
       }
+
+      // Un membre ne peut pas assigner des tâches à un autre membre.
+      // Seul l'utilisateur (à lui-même) et le chef de projet (ou admin) peuvent faire ça.
+      if (assignedToId !== userId) {
+        const isChef = req.user.role === 'ADMIN'
+          || req.user.role === 'CHEF_DE_PROJET'
+          || req.projectMember?.role === 'CHEF_DE_PROJET';
+
+        if (!isChef) {
+          return res.status(403).json({
+            success: false,
+            message: 'En tant que membre, vous ne pouvez pas assigner une tâche à un autre membre. Seul le chef de projet peut assigner des tâches à d\'autres membres.'
+          });
+        }
+      }
     }
 
     const task = await prisma.task.create({
@@ -41,6 +56,7 @@ async function createTask(req, res) {
         priority: priority || 'MOYENNE',
         projectId,
         assignedToId: assignedToId || null,
+        featureId: featureId || null,
         createdById: userId
       },
       include: {
@@ -52,6 +68,9 @@ async function createTask(req, res) {
         },
         project: {
           select: { id: true, name: true }
+        },
+        feature: {
+          select: { id: true, title: true, status: true }
         },
         comments: {
           include: {
@@ -112,11 +131,12 @@ async function createTask(req, res) {
 async function getProjectTasks(req, res) {
   try {
     const { projectId } = req.params;
-    const { status, assignedToId, search } = req.query;
+    const { status, assignedToId, search, featureId } = req.query;
 
     const where = { projectId };
     if (status) where.status = status;
     if (assignedToId) where.assignedToId = assignedToId;
+    if (featureId) where.featureId = featureId;
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -132,6 +152,9 @@ async function getProjectTasks(req, res) {
         },
         createdBy: {
           select: { id: true, name: true }
+        },
+        feature: {
+          select: { id: true, title: true, status: true }
         },
         comments: {
           include: {
@@ -184,6 +207,9 @@ async function getMyTasks(req, res) {
         createdBy: {
           select: { id: true, name: true }
         },
+        feature: {
+          select: { id: true, title: true, status: true }
+        },
         comments: {
           include: {
             user: {
@@ -218,7 +244,7 @@ async function getMyTasks(req, res) {
 async function updateTask(req, res) {
   try {
     const { id } = req.params;
-    const { title, description, status, priority, assignedToId } = req.body;
+    const { title, description, status, priority, assignedToId, featureId } = req.body;
     const currentTask = req.task; // Récupéré depuis le middleware canModifyTask
 
     const updateData = {};
@@ -226,29 +252,39 @@ async function updateTask(req, res) {
     if (description !== undefined) updateData.description = description ? description.trim() : null;
     if (status !== undefined) updateData.status = status;
     if (priority !== undefined) updateData.priority = priority;
+    if (featureId !== undefined) updateData.featureId = featureId || null;
 
-    // Seul le CHEF_DE_PROJET ou un ADMIN peut réassigner une tâche
+    // Seul le CHEF_DE_PROJET ou un ADMIN peut assigner une tâche à autrui.
+    // Un membre peut uniquement s'assigner la tâche à lui-même ou la laisser non assignée.
     if (assignedToId !== undefined) {
-      if (req.isChef || req.user.role === 'ADMIN') {
-        if (assignedToId) {
-          const isProjectMember = await prisma.projectMember.findUnique({
-            where: {
-              projectId_userId: {
-                projectId: currentTask.projectId,
-                userId: assignedToId
-              }
-            }
+      if (assignedToId && assignedToId !== req.user.id) {
+        const isChef = req.isChef || req.user.role === 'ADMIN';
+        if (!isChef) {
+          return res.status(403).json({
+            success: false,
+            message: 'En tant que membre, vous ne pouvez pas assigner une tâche à un autre membre. Seul le chef de projet peut assigner des tâches à d\'autres membres.'
           });
-
-          if (!isProjectMember) {
-            return res.status(400).json({
-              success: false,
-              message: 'L’utilisateur assigné n’est pas membre de ce projet.'
-            });
-          }
         }
-        updateData.assignedToId = assignedToId || null;
       }
+
+      if (assignedToId) {
+        const isProjectMember = await prisma.projectMember.findUnique({
+          where: {
+            projectId_userId: {
+              projectId: currentTask.projectId,
+              userId: assignedToId
+            }
+          }
+        });
+
+        if (!isProjectMember) {
+          return res.status(400).json({
+            success: false,
+            message: 'L’utilisateur assigné n’est pas membre de ce projet.'
+          });
+        }
+      }
+      updateData.assignedToId = assignedToId || null;
     }
 
     const updatedTask = await prisma.task.update({
@@ -263,6 +299,9 @@ async function updateTask(req, res) {
         },
         project: {
           select: { id: true, name: true }
+        },
+        feature: {
+          select: { id: true, title: true, status: true }
         },
         comments: {
           include: {
@@ -354,7 +393,10 @@ async function toggleTaskStatus(req, res) {
         },
         project: {
           select: { id: true, name: true }
-        }
+        },
+        feature: {
+          select: { id: true, title: true, status: true }
+        },
       }
     });
 

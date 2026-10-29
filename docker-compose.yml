@@ -1,4 +1,4 @@
-version: '3.8'
+name: devops-tracker
 
 services:
   # --------------------------------------------------------------------------
@@ -28,9 +28,7 @@ services:
   # Backend Node.js / Express + Prisma + Socket.io
   # --------------------------------------------------------------------------
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     container_name: devops_tracker_backend
     restart: unless-stopped
     environment:
@@ -56,9 +54,7 @@ services:
   # Frontend React (Vite) + Nginx
   # --------------------------------------------------------------------------
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     container_name: devops_tracker_frontend
     restart: unless-stopped
     ports:

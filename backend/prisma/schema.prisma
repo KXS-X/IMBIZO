@@ -61,20 +61,21 @@ enum ActivityType {
 // ------------------------------------------------------
 
 model User {
-  id            String          @id @default(uuid())
-  name          String
-  email         String          @unique
-  password      String
-  role          GlobalRole      @default(USER)
-  avatar        String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id              String          @id @default(uuid())
+  name            String
+  email           String          @unique
+  password        String
+  role            GlobalRole      @default(USER)
+  avatar          String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   // Relations
-  createdProjects Project[]     @relation("ProjectCreator")
+  createdProjects Project[]       @relation("ProjectCreator")
   projectMembers  ProjectMember[]
-  assignedTasks   Task[]        @relation("AssignedTasks")
-  createdTasks    Task[]        @relation("CreatedTasks")
+  assignedTasks   Task[]          @relation("AssignedTasks")
+  createdTasks    Task[]          @relation("CreatedTasks")
+  createdFeatures Feature[]       @relation("CreatedFeatures")
   messages        Message[]
   messageReactions MessageReaction[]
   notifications   Notification[]
@@ -90,6 +91,8 @@ model Project {
   description   String?
   githubRepo    String?         // Format: "owner/repo" ou URL
   webhookSecret String?
+  startDate     DateTime?
+  endDate       DateTime?
   createdById   String
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -98,6 +101,7 @@ model Project {
   createdBy     User            @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Cascade)
   members       ProjectMember[]
   tasks         Task[]
+  features      Feature[]
   messages      Message[]
   notifications Notification[]
   activities    Activity[]
@@ -120,6 +124,24 @@ model ProjectMember {
   @@map("project_members")
 }
 
+model Feature {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus  @default(A_FAIRE)
+  projectId   String
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User        @relation("CreatedFeatures", fields: [createdById], references: [id], onDelete: Cascade)
+  tasks       Task[]
+
+  @@map("features")
+}
+
 model Task {
   id           String       @id @default(uuid())
   title        String
@@ -129,6 +151,7 @@ model Task {
   projectId    String
   assignedToId String?
   createdById  String
+  featureId    String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -136,6 +159,7 @@ model Task {
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignedTo   User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy    User         @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Cascade)
+  feature      Feature?     @relation(fields: [featureId], references: [id], onDelete: SetNull)
   activities   Activity[]
   comments     TaskComment[]
 

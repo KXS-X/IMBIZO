@@ -15,13 +15,20 @@ function sanitizeProject(project) {
  */
 async function createProject(req, res) {
   try {
-    const { name, description, githubRepo, webhookSecret } = req.body;
+    const { name, description, githubRepo, webhookSecret, startDate, endDate } = req.body;
     const userId = req.user.id;
 
     if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Le nom du projet est obligatoire.'
+      });
+    }
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'La date de début ne peut pas être postérieure à la date de fin.'
       });
     }
 
@@ -32,6 +39,8 @@ async function createProject(req, res) {
       description: description ? description.trim() : null,
       githubRepo: githubRepo ? githubRepo.trim() : null,
       webhookSecret: webhookSecret ? webhookSecret.trim() : null,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
       createdById: userId,
     };
 
@@ -342,7 +351,7 @@ async function getAvailableMembers(req, res) {
 async function updateProject(req, res) {
   try {
     const { id } = req.params;
-    const { name, description, githubRepo, webhookSecret } = req.body;
+    const { name, description, githubRepo, webhookSecret, startDate, endDate } = req.body;
 
     const updateData = {};
     if (name !== undefined) updateData.name = name.trim();
@@ -350,6 +359,15 @@ async function updateProject(req, res) {
     if (githubRepo !== undefined) updateData.githubRepo = githubRepo ? githubRepo.trim() : null;
     // Le secret n’est jamais relu côté client : un champ vide conserve le secret actuel.
     if (webhookSecret && webhookSecret.trim()) updateData.webhookSecret = webhookSecret.trim();
+    if (startDate !== undefined) updateData.startDate = startDate ? new Date(startDate) : null;
+    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null;
+
+    if (updateData.startDate && updateData.endDate && updateData.startDate > updateData.endDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'La date de début ne peut pas être postérieure à la date de fin.'
+      });
+    }
 
     const updatedProject = await prisma.project.update({
       where: { id },

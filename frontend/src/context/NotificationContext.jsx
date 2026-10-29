@@ -14,10 +14,12 @@ export function NotificationProvider({ children }) {
     if (!isAuthenticated) return;
     try {
       const res = await notificationService.getNotifications();
-      setNotifications(res.data.notifications);
-      setUnreadCount(res.data.unreadCount);
+      const list = res?.data?.notifications;
+      setNotifications(Array.isArray(list) ? list : []);
+      setUnreadCount(typeof res?.data?.unreadCount === 'number' ? res.data.unreadCount : 0);
     } catch (error) {
       console.error('Erreur lors du chargement des notifications:', error);
+      setNotifications([]);
     }
   }, [isAuthenticated]);
 
@@ -77,6 +79,15 @@ export function NotificationProvider({ children }) {
     }
   };
 
+  const deleteNotification = async (notificationId) => {
+    try {
+      await notificationService.deleteNotification(notificationId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    } catch (error) {
+      console.error('Erreur deleteNotification:', error);
+    }
+  };
+
   return (
     <NotificationContext.Provider
       value={{
@@ -86,6 +97,7 @@ export function NotificationProvider({ children }) {
         fetchNotifications,
         markAsRead,
         markAllAsRead,
+        deleteNotification,
         addRealtimeNotification,
         addToast,
         removeToast

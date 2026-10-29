@@ -16,12 +16,13 @@ const columns = [
   { id: 'TERMINE', title: 'Terminé', icon: CheckCircle2, iconClass: 'text-emerald-500', iconBackground: 'bg-emerald-500/10' },
 ];
 
-export function KanbanBoard({ tasks = [], projectId, members = [], currentUserId, isChefOrAdmin, onTasksChange }) {
+export function KanbanBoard({ tasks = [], projectId, members = [], features = [], currentUserId, isChefOrAdmin, onTasksChange }) {
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAssignee, setFilterAssignee] = useState('all');
   const [selectedTask, setSelectedTask] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isCommentsOnlyModal, setIsCommentsOnlyModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [defaultStatusForNewTask, setDefaultStatusForNewTask] = useState('A_FAIRE');
@@ -78,6 +79,10 @@ export function KanbanBoard({ tasks = [], projectId, members = [], currentUserId
 
     if (!draggedTask || draggedTask.status === newStatus) return;
 
+    // Seul le créateur de la tâche ou le chef de projet / admin peut modifier le statut
+    const canModify = isChefOrAdmin || draggedTask.createdById === currentUserId;
+    if (!canModify) return;
+
     const previousTasks = boardTasks;
     setBoardTasks((currentTasks) => currentTasks.map((task) => String(task.id) === taskId ? { ...task, status: newStatus } : task));
 
@@ -93,11 +98,19 @@ export function KanbanBoard({ tasks = [], projectId, members = [], currentUserId
   const handleCreateInColumn = (status) => {
     setSelectedTask(null);
     setDefaultStatusForNewTask(status);
+    setIsCommentsOnlyModal(false);
     setIsTaskModalOpen(true);
   };
 
   const handleEditTask = (task) => {
     setSelectedTask(task);
+    setIsCommentsOnlyModal(false);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleOpenComments = (task) => {
+    setSelectedTask(task);
+    setIsCommentsOnlyModal(true);
     setIsTaskModalOpen(true);
   };
 
@@ -179,6 +192,7 @@ export function KanbanBoard({ tasks = [], projectId, members = [], currentUserId
                       onToggleStatus={handleToggleStatus}
                       onStatusChange={handleStatusChange}
                       onEdit={handleEditTask}
+                      onOpenComments={handleOpenComments}
                       onDelete={(taskId) => { setTaskToDelete(taskId); setIsDeleteModalOpen(true); }}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
@@ -196,11 +210,16 @@ export function KanbanBoard({ tasks = [], projectId, members = [], currentUserId
 
       <TaskModal
         isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setIsCommentsOnlyModal(false);
+        }}
         projectId={projectId}
         task={selectedTask}
         members={members}
+        features={features}
         defaultStatus={defaultStatusForNewTask}
+        commentsOnly={isCommentsOnlyModal}
         onTaskSaved={onTasksChange}
       />
 

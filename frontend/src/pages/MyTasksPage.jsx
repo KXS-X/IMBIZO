@@ -39,6 +39,7 @@ export function MyTasksPage() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isCommentsOnly, setIsCommentsOnly] = useState(false);
 
   const loadTasks = async () => {
     try {
@@ -154,9 +155,16 @@ export function MyTasksPage() {
                   task={task}
                   onToggleStatus={handleToggleTask}
                   onStatusChange={handleStatusChange}
-                  onEdit={(t) => setSelectedTask(t)}
+                  onEdit={(t) => {
+                    setSelectedTask(t);
+                    setIsCommentsOnly(false);
+                  }}
+                  onOpenComments={(t) => {
+                    setSelectedTask(t);
+                    setIsCommentsOnly(true);
+                  }}
                   currentUserId={user?.id}
-                  isChefOrAdmin={false}
+                  isChefOrAdmin={isAdmin || user?.role === 'CHEF_DE_PROJET'}
                 />
               ))}
             </div>
@@ -167,10 +175,14 @@ export function MyTasksPage() {
       {selectedTask && (
         <TaskModal
           isOpen={Boolean(selectedTask)}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => {
+            setSelectedTask(null);
+            setIsCommentsOnly(false);
+          }}
           projectId={selectedTask.projectId}
           task={selectedTask}
           members={[]}
+          commentsOnly={isCommentsOnly}
           onTaskSaved={loadTasks}
         />
       )}

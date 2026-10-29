@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CheckSquare, Clock, Edit2, MessageSquare, Square, Trash2 } from 'lucide-react';
+import { CheckSquare, Clock, Edit2, Layers, MessageSquare, Square, Trash2 } from 'lucide-react';
 
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
 import { UserAvatar } from '../common/UserAvatar';
+import { useAuth } from '../../context/AuthContext';
 
 const priorityStyles = {
   HAUTE: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400',
@@ -40,9 +41,24 @@ const statusLabels = {
   TERMINE: 'Terminé',
 };
 
-export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChange, currentUserId, isChefOrAdmin, onDragStart, onDragEnd, isDragging }) {
-  const isAssignedToMe = task.assignedToId === currentUserId;
-  const canEdit = isChefOrAdmin || isAssignedToMe || task.createdById === currentUserId;
+export function TaskCard({
+  task,
+  onToggleStatus,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  onOpenComments,
+  currentUserId,
+  isChefOrAdmin,
+  onDragStart,
+  onDragEnd,
+  isDragging
+}) {
+  const { user } = useAuth();
+  const activeUserId = currentUserId ?? user?.id;
+  const isCreator = Boolean(activeUserId && task.createdById === activeUserId);
+  const isAssignedToMe = Boolean(activeUserId && (task.assignedToId === activeUserId || task.assignedTo?.id === activeUserId));
+  const canEdit = Boolean(isChefOrAdmin || isCreator);
   const isDone = task.status === 'TERMINE';
 
   let timeAgo = '';
@@ -55,11 +71,15 @@ export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChang
   return (
     <Card
       size="sm"
-      draggable
-      onDragStart={(event) => onDragStart?.(event, task)}
+      draggable={canEdit}
+      onDragStart={(event) => {
+        if (!canEdit) return;
+        onDragStart?.(event, task);
+      }}
       onDragEnd={onDragEnd}
       className={cn(
-        'cursor-grab shadow-none transition-[transform,opacity,box-shadow] hover:ring-primary/30 active:cursor-grabbing',
+        canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
+        'shadow-none transition-[transform,opacity,box-shadow] hover:ring-primary/30',
         isDragging && 'scale-[0.98] opacity-45 ring-2 ring-primary/40',
         isDone && 'bg-emerald-500/5 ring-emerald-500/30'
       )}
@@ -70,9 +90,10 @@ export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChang
             type="button"
             variant="ghost"
             size="icon-sm"
-            className={cn('mt-[-2px] shrink-0 text-muted-foreground', isDone && 'text-emerald-500')}
-            onClick={() => onToggleStatus(task.id)}
-            title={isDone ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
+            disabled={!canEdit}
+            className={cn('mt-[-2px] shrink-0 text-muted-foreground', isDone && 'text-emerald-500', !canEdit && 'opacity-60 cursor-not-allowed')}
+            onClick={() => canEdit && onToggleStatus(task.id)}
+            title={!canEdit ? 'Seul le créateur ou le chef de projet peut modifier cette tâche' : isDone ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
             aria-label={isDone ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
           >
             {isDone ? <CheckSquare /> : <Square />}
@@ -111,6 +132,12 @@ export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChang
                 {priorityLabels[task.priority] || task.priority}
               </Badge>
             )}
+            {task.feature && (
+              <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary text-[10px] gap-1 max-w-[150px] truncate" title={`Fonctionnalité : ${task.feature.title}`}>
+                <Layers className="size-2.5 shrink-0" />
+                <span className="truncate">{task.feature.title}</span>
+              </Badge>
+            )}
             {task.project && <span className="truncate text-xs text-muted-foreground">{task.project.name}</span>}
           </div>
 
@@ -147,17 +174,23 @@ export function TaskCard({ task, onToggleStatus, onEdit, onDelete, onStatusChang
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            {Boolean(task._count?.comments || task.comments?.length) && (
-              <button
-                type="button"
-                onClick={() => onEdit?.(task)}
-                className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
-                title={`${task._count?.comments || task.comments?.length} commentaire(s)`}
-              >
-                <MessageSquare className="size-3.5" />
-                <span className="text-[11px] font-medium">{task._count?.comments || task.comments?.length}</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenComments) {
+                  onOpenComments(task);
+                } else if (onEdit) {
+                  onEdit(task);
+                }
+              }}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+              title={`${task._count?.comments || task.comments?.length || 0} commentaire(s) - Voir l'espace commentaires`}
+              aria-label="Voir les commentaires"
+            >
+              <MessageSquare className="size-3.5" />
+              <span className="text-[11px] font-medium">{task._count?.comments || task.comments?.length || 0}</span>
+            </button>
             {timeAgo && (
               <div className="flex shrink-0 items-center gap-1">
                 <Clock className="size-3" />

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { projectService } from '../services/projectService';
 import { taskService } from '../services/taskService';
 import { TaskCard } from '../components/kanban/TaskCard';
+import { TaskModal } from '../components/kanban/TaskModal';
 import { RoleBadge } from '../components/common/Badge';
 import { Button } from '../components/ui/button';
 import {
@@ -63,6 +64,8 @@ export function DashboardPage() {
   const [projects, setProjects] = useState([]);
   const [myTasks, setMyTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isCommentsOnly, setIsCommentsOnly] = useState(false);
 
   const loadDashboardData = async () => {
     try {
@@ -102,7 +105,7 @@ export function DashboardPage() {
       <section className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Bonjour, <span className="text-primary">{user?.name}</span> <span aria-hidden="true">👋</span>
+            Akwaba, <span className="text-primary">{user?.name}</span> <span aria-hidden="true">👋</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Voici l’état d’avancement de vos projets et tâches en cours.
@@ -189,6 +192,14 @@ export function DashboardPage() {
                     key={task.id}
                     task={task}
                     onToggleStatus={handleToggleTask}
+                    onEdit={(t) => {
+                      setSelectedTask(t);
+                      setIsCommentsOnly(false);
+                    }}
+                    onOpenComments={(t) => {
+                      setSelectedTask(t);
+                      setIsCommentsOnly(true);
+                    }}
                     currentUserId={user?.id}
                     isChefOrAdmin={false}
                   />
@@ -198,6 +209,20 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </section>
+
+      {selectedTask && (
+        <TaskModal
+          isOpen={Boolean(selectedTask)}
+          onClose={() => {
+            setSelectedTask(null);
+            setIsCommentsOnly(false);
+          }}
+          projectId={selectedTask.projectId}
+          task={selectedTask}
+          commentsOnly={isCommentsOnly}
+          onTaskSaved={loadDashboardData}
+        />
+      )}
     </div>
   );
 }

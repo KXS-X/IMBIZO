@@ -12,6 +12,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const featureRoutes = require('./routes/featureRoutes');
 const { uploadDirectory } = require('./middlewares/upload');
 
 const app = express();
@@ -68,8 +69,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes);
+app.use('/api/projects/:projectId/features', featureRoutes);
 app.use('/api/projects/:projectId/messages', messageRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/features', featureRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/stats', statsRoutes);

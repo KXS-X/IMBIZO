@@ -44,12 +44,14 @@ export function NotificationsPage() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [filterType, setFilterType] = useState('ALL');
 
-  const counts = useMemo(() => filters.reduce((result, filter) => {
-    result[filter.id] = filter.id === 'ALL' ? notifications.length : notifications.filter((notification) => notification.type === filter.id).length;
-    return result;
-  }, {}), [notifications]);
+  const safeNotifications = useMemo(() => (Array.isArray(notifications) ? notifications : []), [notifications]);
 
-  const filteredNotifications = notifications.filter((notification) => filterType === 'ALL' || notification.type === filterType);
+  const counts = useMemo(() => filters.reduce((result, filter) => {
+    result[filter.id] = filter.id === 'ALL' ? safeNotifications.length : safeNotifications.filter((n) => n?.type === filter.id).length;
+    return result;
+  }, {}), [safeNotifications]);
+
+  const filteredNotifications = safeNotifications.filter((n) => filterType === 'ALL' || n?.type === filterType);
 
   return (
     <div className="page-container space-y-6">

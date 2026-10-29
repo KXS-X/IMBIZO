@@ -186,7 +186,7 @@
   }
 }
 
-/* Effet Glassmorphism */
+/* Effet Glassmorphism et fond personnalisé */
 .glass-panel {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
@@ -199,6 +199,10 @@
 
 .glass-panel:hover {
   border-color: var(--border-hover);
+}
+
+header.sticky {
+  background-color: var(--bg-card) !important;
 }
 
 /* Mise en page Globale */

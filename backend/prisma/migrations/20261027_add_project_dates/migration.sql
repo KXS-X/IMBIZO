@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "startDate" TIMESTAMP(3);
+ALTER TABLE "projects" ADD COLUMN IF NOT EXISTS "endDate" TIMESTAMP(3);
+

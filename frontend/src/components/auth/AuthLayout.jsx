@@ -55,7 +55,7 @@ function FlowPreview() {
 
 export function AuthLayout({ eyebrow, title, description, children, footer }) {
   return (
-    <main className="min-h-svh bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+    <main className="min-h-svh bg-slate-50/75 text-slate-950 backdrop-blur-md dark:bg-slate-950/75 dark:text-slate-50">
       <div className="mx-auto grid min-h-svh w-full max-w-[1440px] grid-cols-1 gap-10 px-6 py-8 sm:px-10 lg:grid-cols-[minmax(0,1fr)_460px] lg:items-center lg:gap-24 lg:px-16 lg:py-12">
         <section className="hidden lg:block" aria-label="Présentation de Imbizo">
           <BrandMark />

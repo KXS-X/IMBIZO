@@ -134,6 +134,8 @@ async function canModifyTask(req, res, next) {
     // Bypass pour le super admin
     if (req.user.role === 'ADMIN') {
       req.task = task;
+      req.isChef = true;
+      req.isCreator = task.createdById === req.user.id;
       return next();
     }
 
@@ -147,22 +149,21 @@ async function canModifyTask(req, res, next) {
       });
     }
 
-    // Chef de projet, créateur de la tâche, ou assigné
-    const isChef = member.role === 'CHEF_DE_PROJET';
-    const isAssignee = task.assignedToId === req.user.id;
+    // Seul le chef de projet (ou un admin) ou l'auteur créateur de la tâche peut la modifier
+    const isChef = member.role === 'CHEF_DE_PROJET' || req.user.role === 'CHEF_DE_PROJET';
     const isCreator = task.createdById === req.user.id;
 
-    if (!isChef && !isAssignee && !isCreator) {
+    if (!isChef && !isCreator) {
       return res.status(403).json({
         success: false,
-        message: 'Vous n\'avez pas les droits nécessaires pour modifier cette tâche.'
+        message: 'En tant que membre, vous ne pouvez modifier que les tâches que vous avez vous-même créées.'
       });
     }
 
     req.task = task;
     req.projectMember = member;
     req.isChef = isChef;
-    req.isAssignee = isAssignee;
+    req.isCreator = isCreator;
     next();
   } catch (error) {
     console.error('Erreur dans canModifyTask:', error);

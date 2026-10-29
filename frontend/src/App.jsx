@@ -6,6 +6,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { TooltipProvider } from './components/ui/tooltip';
 import { Layout } from './components/common/Layout';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -47,38 +48,40 @@ function AdminRoute({ children }) {
 
 export function App() {
   return (
-    <ThemeProvider>
-      <TooltipProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <SocketProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Layout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route index element={<DashboardPage />} />
-                    <Route path="projects" element={<ProjectsPage />} />
-                    <Route path="projects/:id" element={<ProjectDetailPage />} />
-                    <Route path="tasks" element={<MyTasksPage />} />
-                    <Route path="notifications" element={<NotificationsPage />} />
-                    <Route path="admin" element={<AdminRoute><AdminBackofficePage /></AdminRoute>} />
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Route>
-                </Routes>
-              </BrowserRouter>
-            </SocketProvider>
-          </NotificationProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <TooltipProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <SocketProvider>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <Layout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<DashboardPage />} />
+                      <Route path="projects" element={<ProjectsPage />} />
+                      <Route path="projects/:id" element={<ProjectDetailPage />} />
+                      <Route path="tasks" element={<MyTasksPage />} />
+                      <Route path="notifications" element={<NotificationsPage />} />
+                      <Route path="admin" element={<AdminRoute><AdminBackofficePage /></AdminRoute>} />
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Route>
+                  </Routes>
+                </BrowserRouter>
+              </SocketProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

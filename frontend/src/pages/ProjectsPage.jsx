@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, CheckSquare, FolderKanban, GitBranch, Plus, Search, Users } from 'lucide-react';
+import { ArrowRight, Calendar, CheckSquare, FolderKanban, GitBranch, Plus, Search, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { projectService } from '../services/projectService';
@@ -55,6 +55,19 @@ function ProjectRoleBadge({ role }) {
 function getGithubHref(repository) {
   if (/^https?:\/\//i.test(repository)) return repository;
   return `https://github.com/${repository.replace(/^\/+/, '')}`;
+}
+
+function formatProjectDate(dateString) {
+  if (!dateString) return '';
+  try {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch {
+    return '';
+  }
 }
 
 function MemberStack({ members = [] }) {
@@ -114,6 +127,18 @@ function ProjectCard({ project }) {
         <CardDescription className="line-clamp-2 min-h-10">
           {project.description || 'Aucune description fournie.'}
         </CardDescription>
+        {(project.startDate || project.endDate) && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+            <Calendar className="size-3.5 text-primary shrink-0" />
+            <span>
+              {project.startDate && project.endDate
+                ? `Du ${formatProjectDate(project.startDate)} au ${formatProjectDate(project.endDate)}`
+                : project.startDate
+                ? `Début : ${formatProjectDate(project.startDate)}`
+                : `Échéance : ${formatProjectDate(project.endDate)}`}
+            </span>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="mt-auto space-y-5">
@@ -181,6 +206,8 @@ export function ProjectsPage() {
   const [description, setDescription] = useState('');
   const [githubRepo, setGithubRepo] = useState('');
   const [webhookSecret, setWebhookSecret] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
 
@@ -205,12 +232,19 @@ export function ProjectsPage() {
     setDescription('');
     setGithubRepo('');
     setWebhookSecret('');
+    setStartDate('');
+    setEndDate('');
     setError('');
   };
 
   const handleCreateProject = async (event) => {
     event.preventDefault();
     if (!name.trim()) return;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      setError('La date de début ne peut pas être postérieure à la date de fin.');
+      return;
+    }
 
     setCreating(true);
     setError('');
@@ -221,6 +255,8 @@ export function ProjectsPage() {
         description: description.trim(),
         githubRepo: githubRepo.trim(),
         webhookSecret: webhookSecret.trim(),
+        startDate: startDate || null,
+        endDate: endDate || null,
       });
 
       setIsCreateModalOpen(false);
@@ -354,6 +390,28 @@ export function ProjectsPage() {
                 onChange={(event) => setDescription(event.target.value)}
                 rows={3}
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="project-start-date">Date de début</Label>
+                <Input
+                  id="project-start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => setStartDate(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-end-date">Date de fin</Label>
+                <Input
+                  id="project-end-date"
+                  type="date"
+                  value={endDate}
+                  min={startDate || undefined}
+                  onChange={(event) => setEndDate(event.target.value)}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
